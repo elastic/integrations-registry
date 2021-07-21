@@ -5,6 +5,7 @@
 package util
 
 import (
+	"context"
 	"log"
 	"os"
 	"path/filepath"
@@ -12,6 +13,7 @@ import (
 
 	"github.com/Masterminds/semver/v3"
 	"github.com/pkg/errors"
+	"go.elastic.co/apm"
 )
 
 // PackageValidationDisabled is a flag which can disable package content validation (package, data streams, assets, etc.).
@@ -25,7 +27,10 @@ type Packages []Package
 // The list is stored in memory and on the second request directly served from memory.
 // This assumes changes to packages only happen on restart (unless development mode is enabled).
 // Caching the packages request many file reads every time this method is called.
-func GetPackages(packagesBasePaths []string) (Packages, error) {
+func GetPackages(ctx context.Context, packagesBasePaths []string) (Packages, error) {
+	span, _ := apm.StartSpan(ctx, "GetPackages", "custom")
+	defer span.End()
+
 	if packageList != nil {
 		return packageList, nil
 	}

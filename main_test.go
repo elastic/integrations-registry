@@ -197,7 +197,7 @@ func runEndpoint(t *testing.T, endpoint, path, file string, handler func(w http.
 		t.Fatal(err)
 	}
 
-	assert.Equal(t, bytes.TrimSpace(data), bytes.TrimSpace(recorded))
+	assert.Equal(t, string(bytes.TrimSpace(data)), string(bytes.TrimSpace(recorded)))
 
 	// Skip cache check if 4xx error
 	if recorder.Code >= 200 && recorder.Code < 300 {

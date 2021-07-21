@@ -19,6 +19,8 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 
+	"go.elastic.co/apm/module/apmgorilla"
+
 	ucfgYAML "github.com/elastic/go-ucfg/yaml"
 
 	"github.com/elastic/package-registry/util"
@@ -132,7 +134,7 @@ func printConfig(config *Config) {
 }
 
 func ensurePackagesAvailable(packagesBasePaths []string) {
-	packages, err := util.GetPackages(packagesBasePaths)
+	packages, err := util.GetPackages(context.TODO(), packagesBasePaths)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -166,6 +168,8 @@ func getRouter(config *Config, packagesBasePaths []string) (*mux.Router, error) 
 	packageIndexHandler := packageIndexHandler(packagesBasePaths, config.CacheTimeCatchAll)
 
 	router := mux.NewRouter().StrictSlash(true)
+	apmgorilla.Instrument(router)
+
 	router.HandleFunc("/", indexHandlerFunc)
 	router.HandleFunc("/index.json", indexHandlerFunc)
 	router.HandleFunc("/search", searchHandler(packagesBasePaths, config.CacheTimeSearch))
